@@ -17,7 +17,7 @@ export default function BackgroundGradientAnimationDemo() {
                     <TextGenerateEffect words={description} />
 
                     <div className="flex justify-center items-center">
-                        <Link href="/journal">
+                        <Link href="/new-user">
                             <ButtonsCard>{buttons[7].component}</ButtonsCard>
                         </Link>
                     </div>

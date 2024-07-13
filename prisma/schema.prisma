@@ -12,14 +12,15 @@ model User {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  name      String?
+  clerkId   String   @unique
+  email     String   @unique
 
-  clerkId String? @unique
-  email   String  @unique
-
-  entries JounralEntry[]
+  entries  JournalEntry[]
+  analyses Analysis[]
 }
 
-model JounralEntry {
+model JournalEntry {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -27,9 +28,18 @@ model JounralEntry {
   userId String
   user   User   @relation(fields: [userId], references: [id])
 
-  content String @db.Text
+  content String             @db.Text
+  status  JournalEntryStatus @default(DRAFT)
 
   analysis Analysis?
+
+  @@unique([userId, id])
+}
+
+enum JournalEntryStatus {
+  DRAFT
+  PENDING
+  ANALYZED
 }
 
 model Analysis {
@@ -38,12 +48,18 @@ model Analysis {
   updatedAt DateTime @updatedAt
 
   entryId String
-  entry   JounralEntry @relation(fields: [entryId], references: [id])
+  entry   JournalEntry @relation(fields: [entryId], references: [id])
 
-  mood     String
-  summary  String  @db.Text
-  color    String
-  negaitve Boolean
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  mood           String  @db.Text
+  subject        String  @db.Text
+  negative       Boolean
+  summary        String  @db.Text
+  color          String  @default("#0101fe") @db.Text
+  sentimentScore Float
 
   @@unique([entryId])
+  @@index([userId])
 }

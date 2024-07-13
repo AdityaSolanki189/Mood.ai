@@ -1,10 +1,12 @@
 import { prisma } from '@/prisma/client';
 import { currentUser } from '@clerk/nextjs/server';
-import { redirect } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 
 const createNewUser = async () => {
     const user = await currentUser();
     console.log(user);
+
+    if (!user) console.log('No user found');
 
     const match = await prisma.user.findUnique({
         where: {
@@ -21,11 +23,13 @@ const createNewUser = async () => {
         });
     }
 
-    redirect('/journal');
+    if (!user) return notFound();
+    else redirect('/journal');
 };
 
 const NewUser = async () => {
     await createNewUser();
+    console.log('User created');
     return <div>...loading</div>;
 };
 
