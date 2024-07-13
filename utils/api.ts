@@ -34,7 +34,7 @@ export const updateEntry = async ({
     updates,
 }: {
     id: string;
-    updates: { content: any };
+    updates: { content: string };
 }) => {
     const res = await fetch(
         new Request(createURL(`/api/entry/${id}`), {

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useAutosave } from 'react-autosave';
 import Spinner from './Spinner';
+import { JournalEntry } from '@prisma/client';
 
 const Editor = ({ entry }: { entry: any }) => {
     const [text, setText] = useState(entry.content);
@@ -16,6 +17,22 @@ const Editor = ({ entry }: { entry: any }) => {
         router.push('/journal');
     };
 
+    const analyzeData = async () => {
+        // const analysis = await analyzeEntry(entry);
+        // const savedAnalysis = await prisma.analysis.upsert({
+        //     where: {
+        //         entryId: entry.id,
+        //     },
+        //     update: { ...analysis },
+        //     create: {
+        //         entryId: entry.id,
+        //         userId: user.id,
+        //         ...analysis,
+        //     },
+        // });
+        // setEntry({ ...currentEntry, analysis: savedAnalysis });
+    }
+
     useAutosave({
         data: text,
         onSave: async (_text) => {
@@ -24,7 +41,7 @@ const Editor = ({ entry }: { entry: any }) => {
 
             const { data } = await updateEntry({
                 id: entry.id,
-                updates: _text,
+                updates: { content: _text},
             });
 
             setEntry(data);
@@ -53,7 +70,7 @@ const Editor = ({ entry }: { entry: any }) => {
                     // style={{ background: currentEntry.analysis.color }}
                     className="h-[100px] bg-blue-600 text-white p-8"
                 >
-                    <h2 className="text-2xl bg-white/25 text-black">
+                    <h2 className="text-2xl">
                         Analysis
                     </h2>
                 </div>
@@ -85,7 +102,14 @@ const Editor = ({ entry }: { entry: any }) => {
                                     : 'False'} */}
                             </div>
                         </li>
-                        <li className="py-4 px-8 flex items-center justify-between">
+                        <li className="py-4 px-8 flex items-center justify-around">
+                            <button
+                                onClick={analyzeData}
+                                type="button"
+                                className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                            >
+                                Analyze Entry
+                            </button>
                             <button
                                 onClick={handleDelete}
                                 type="button"

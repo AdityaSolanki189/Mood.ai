@@ -30,7 +30,6 @@ export const DELETE = async (request: NextRequest, { params }: Props) => {
 export const PATCH = async (request: NextRequest, { params }: Props) => {
     const { updates } = await request.json();
     const user = await getUserFromClerkID();
-    const updatedData = typeof updates === 'string' ? { content: updates } : updates;
 
     const entry = await prisma.journalEntry.update({
         where: {
@@ -39,7 +38,7 @@ export const PATCH = async (request: NextRequest, { params }: Props) => {
                 userId: user.id,
             },
         },
-        data: updatedData,
+        data: updates,
     });
 
     // const analysis = await analyzeEntry(entry);
