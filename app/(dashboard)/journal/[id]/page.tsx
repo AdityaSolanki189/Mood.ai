@@ -1,8 +1,38 @@
-import { JournalEntry } from '@prisma/client';
-import React from 'react';
+import Editor from '@/app/_components/Editor';
+import { prisma } from '@/prisma/client';
+import { getUserFromClerkID } from '@/utils/auth';
 
-const EntryPage = ({ param }: { param: JournalEntry }) => {
-    return <div>yoo</div>;
+const getEntry = async (id: string) => {
+    const user = await getUserFromClerkID();
+    const entry = await prisma.journalEntry.findUnique({
+        where: {
+            userId_id: {
+                userId: user.id,
+                id,
+            },
+        },
+        include: {
+            analysis: true,
+        },
+    });
+
+    return entry;
 };
 
-export default EntryPage;
+interface Props {
+    params: {
+        id: string;
+    };
+}
+
+const JournalEditorPage = async ({ params }: Props) => {
+    const entry = await getEntry(params.id);
+
+    return (
+        <div className="w-full h-full">
+            <Editor entry={entry} />
+        </div>
+    );
+};
+
+export default JournalEditorPage;

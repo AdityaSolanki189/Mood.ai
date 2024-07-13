@@ -1,6 +1,8 @@
 import type { User } from '@clerk/nextjs/server';
 import { prisma } from '@/prisma/client';
 import { auth } from '@clerk/nextjs/server';
+import { redirect } from 'next/dist/server/api-utils';
+import { notFound } from 'next/navigation';
 
 export const getUserFromClerkID = async (select = { id: true }) => {
     const { userId } = auth();
@@ -10,6 +12,10 @@ export const getUserFromClerkID = async (select = { id: true }) => {
         },
         select,
     });
+
+    if(!user) {
+        notFound();
+    }
 
     return user;
 };

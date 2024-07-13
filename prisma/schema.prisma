@@ -48,10 +48,10 @@ model Analysis {
   updatedAt DateTime @updatedAt
 
   entryId String
-  entry   JournalEntry @relation(fields: [entryId], references: [id])
+  entry   JournalEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
 
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   mood           String  @db.Text
   subject        String  @db.Text
