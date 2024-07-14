@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import { deleteEntry, updateEntry } from '@/utils/api';
 import { analyzeEntry } from '@/utils/openAi';
 import { useRouter } from 'next/navigation';
@@ -11,8 +11,9 @@ const Editor = ({ entry }: { entry: any }) => {
     const [currentEntry, setEntry] = useState(entry);
     const [isSaving, setIsSaving] = useState(false);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [currentAnalysis, setAnalysis] = useState(entry.analysis);
     const router = useRouter();
-
+    console.log('currentAnalysis', currentAnalysis);
     const handleDelete = async () => {
         await deleteEntry(entry.id);
         router.push('/journal');
@@ -20,7 +21,8 @@ const Editor = ({ entry }: { entry: any }) => {
 
     const analyzeData = async (): Promise<void> => {
         setIsAnalyzing(true);
-        const analysis = await analyzeEntry(entry);
+        console.log('Analyzing Entry');
+        const analysis = await analyzeEntry(currentEntry.content);
 
         const { data } = await updateEntry({
             id: entry.id,
@@ -29,7 +31,8 @@ const Editor = ({ entry }: { entry: any }) => {
         });
 
         setEntry(data);
-        console.log('Analyze Entry', analysis);
+        setAnalysis(analysis);
+        console.log('data', analysis);
 
         setIsAnalyzing(false);
     };
@@ -63,56 +66,54 @@ const Editor = ({ entry }: { entry: any }) => {
                 <textarea
                     value={text}
                     onChange={(e) => setText(e.target.value)}
-                    className="w-full h-full text-xl p-8"
+                    className="w-full h-5/6 text-xl p-8"
                 />
             </div>
             <div className="border-l border-black/5">
-                {currentEntry.analysis ? (
-                    <div
-                        style={{ background: currentEntry.analysis.color }}
-                        className="h-[100px] bg-blue-600 text-white p-8"
-                    >
-                        <h2 className="text-2xl">Analysis</h2>
-                        <ul role="list" className="divide-y divide-gray-200">
-                            <li className="py-4 px-8 flex items-center justify-between">
-                                <div className="text-xl font-semibold w-1/3">
-                                    Subject
-                                </div>
-                                <div className="text-xl">
-                                    {currentEntry.analysis.subject}
-                                </div>
-                            </li>
-
-                            <li className="py-4 px-8 flex items-center justify-between">
-                                <div className="text-xl font-semibold">
-                                    Mood
-                                </div>
-                                <div className="text-xl">
-                                    {currentEntry.analysis.mood}
-                                </div>
-                            </li>
-
-                            <li className="py-4 px-8 flex items-center justify-between">
-                                <div className="text-xl font-semibold">
-                                    Negative
-                                </div>
-                                <div className="text-xl">
-                                    {currentEntry.analysis.negative
-                                        ? 'True'
-                                        : 'False'}
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                ) : (
-                    <div className="h-[100px] bg-gray-200 text-gray-600 p-8">
-                        <h2 className="text-2xl">Analysis</h2>
-                        <p className="text-xl">No analysis available</p>
-                    </div>
-                )}
-
                 <div>
+                    <div
+                        style={{ background: currentAnalysis.color }}
+                        className="flex justify-center bg-blue-600 text-white font-bold p-4"
+                    >
+                        <h2 className="text-4xl shadow-2xl hover:backdrop-brightness-75 rounded-lg p-2">
+                            Analysis
+                        </h2>
+                    </div>
                     <ul role="list" className="divide-y divide-gray-200">
+                        <li className="py-4 px-8 flex items-center justify-between hover:backdrop-brightness-90">
+                            <div className="text-xl font-semibold w-1/3">
+                                Subject
+                            </div>
+                            <div className="text-xl">
+                                {/* // convert to camel case */}
+                                {currentAnalysis.subject}
+                            </div>
+                        </li>
+
+                        <li className="py-4 px-8 flex items-center justify-between hover:backdrop-brightness-90">
+                            <div className="text-xl font-semibold">Mood</div>
+                            <div className="text-xl">
+                                {currentAnalysis.mood}
+                            </div>
+                        </li>
+
+                        <li className="py-4 px-8 flex items-center justify-between hover:backdrop-brightness-90">
+                            <div className="text-xl font-semibold">
+                                Negative
+                            </div>
+                            <div className="text-xl">
+                                {currentAnalysis.negative ? 'True' : 'False'}
+                            </div>
+                        </li>
+
+                        <li className="py-4 px-8 flex flex-col items-center justify-between hover:backdrop-brightness-90">
+                            <div className="text-xl font-semibold pb-2">
+                                Summary
+                            </div>
+                            <div className="text-lg">
+                                {currentAnalysis.summary}
+                            </div>
+                        </li>
                         <li className="py-4 px-8 flex items-center justify-around">
                             <button
                                 onClick={analyzeData}

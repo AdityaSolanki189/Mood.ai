@@ -1,3 +1,5 @@
+"use server";
+
 import { OpenAI } from '@langchain/openai';
 import { PromptTemplate } from '@langchain/core/prompts';
 import { loadQARefineChain } from 'langchain/chains';
@@ -15,11 +17,11 @@ const parser = StructuredOutputParser.fromZodSchema(
         mood: z
             .string()
             .describe('the mood of the person who wrote the journal entry.'),
-        subject: z.string().describe('the subject of the journal entry.'),
+        subject: z.string().describe('the subject of the journal entry, it should be in camel case and should contain spaces.'),
         negative: z
             .boolean()
             .describe(
-                'is the journal entry negative? (i.e. does it contain negative emotions?).'
+                'is the journal entry negative? (i.e. does it contain negative emotions?). First letter always capitalized.'
             ),
         summary: z.string().describe('quick summary of the entire entry.'),
         color: z
@@ -60,7 +62,7 @@ export const analyzeEntry = async (prompt: string) => {
         apiKey: process.env.OPENAI_API_KEY,
     });
     const output = await model.invoke(input);
-
+    console.log("output", output);
     try {
         return parser.parse(output);
     } catch (e) {
@@ -69,6 +71,7 @@ export const analyzeEntry = async (prompt: string) => {
             parser
         );
         const fixedOutput = await fixParser.parse(output);
+        console.log("Error", e);
         return fixedOutput;
     }
 };
