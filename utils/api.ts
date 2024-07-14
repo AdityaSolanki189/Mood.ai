@@ -29,17 +29,30 @@ export const deleteEntry = async (id: string) => {
     }
 };
 
+interface IAnalytics {
+    mood: string;
+    subject: string;
+    negative: boolean;
+    summary: string;
+    color: string;
+    sentimentScore: number;
+}
+
 export const updateEntry = async ({
     id,
     updates,
+    analytics,
 }: {
     id: string;
     updates: { content: string };
+    analytics?: IAnalytics;
 }) => {
+    const body = analytics ? { updates, analytics } : { updates };
+
     const res = await fetch(
         new Request(createURL(`/api/entry/${id}`), {
             method: 'PATCH',
-            body: JSON.stringify({ updates }),
+            body: JSON.stringify(body),
         })
     );
 

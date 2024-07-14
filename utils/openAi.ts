@@ -52,16 +52,25 @@ const getPrompt = async (content: string) => {
     return input;
 };
 
-export const analyze = async (prompt: string) => {
+export const analyzeEntry = async (prompt: string) => {
+    const input = await getPrompt(prompt);
     const model = new OpenAI({
         model: 'gpt-3.5-turbo-instruct',
         temperature: 0,
         apiKey: process.env.OPENAI_API_KEY,
     });
+    const output = await model.invoke(input);
 
-    const res = await model.invoke(prompt);
-
-    console.log(res);
+    try {
+        return parser.parse(output);
+    } catch (e) {
+        const fixParser = OutputFixingParser.fromLLM(
+            new OpenAI({ modelName: 'gpt-3.5-turbo', temperature: 0 }),
+            parser
+        );
+        const fixedOutput = await fixParser.parse(output);
+        return fixedOutput;
+    }
 };
 
 // export const qa = async (question, entries) => {

@@ -1,15 +1,16 @@
-'use client';
+"use client";
 import { deleteEntry, updateEntry } from '@/utils/api';
+import { analyzeEntry } from '@/utils/openAi';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useAutosave } from 'react-autosave';
 import Spinner from './Spinner';
-import { JournalEntry } from '@prisma/client';
 
 const Editor = ({ entry }: { entry: any }) => {
     const [text, setText] = useState(entry.content);
     const [currentEntry, setEntry] = useState(entry);
     const [isSaving, setIsSaving] = useState(false);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
     const router = useRouter();
 
     const handleDelete = async () => {
@@ -17,21 +18,21 @@ const Editor = ({ entry }: { entry: any }) => {
         router.push('/journal');
     };
 
-    const analyzeData = async () => {
-        // const analysis = await analyzeEntry(entry);
-        // const savedAnalysis = await prisma.analysis.upsert({
-        //     where: {
-        //         entryId: entry.id,
-        //     },
-        //     update: { ...analysis },
-        //     create: {
-        //         entryId: entry.id,
-        //         userId: user.id,
-        //         ...analysis,
-        //     },
-        // });
-        // setEntry({ ...currentEntry, analysis: savedAnalysis });
-    }
+    const analyzeData = async (): Promise<void> => {
+        setIsAnalyzing(true);
+        const analysis = await analyzeEntry(entry);
+
+        const { data } = await updateEntry({
+            id: entry.id,
+            updates: { content: text },
+            analytics: analysis,
+        });
+
+        setEntry(data);
+        console.log('Analyze Entry', analysis);
+
+        setIsAnalyzing(false);
+    };
 
     useAutosave({
         data: text,
@@ -41,7 +42,7 @@ const Editor = ({ entry }: { entry: any }) => {
 
             const { data } = await updateEntry({
                 id: entry.id,
-                updates: { content: _text},
+                updates: { content: _text },
             });
 
             setEntry(data);
@@ -66,49 +67,65 @@ const Editor = ({ entry }: { entry: any }) => {
                 />
             </div>
             <div className="border-l border-black/5">
-                <div
-                    // style={{ background: currentEntry.analysis.color }}
-                    className="h-[100px] bg-blue-600 text-white p-8"
-                >
-                    <h2 className="text-2xl">
-                        Analysis
-                    </h2>
-                </div>
+                {currentEntry.analysis ? (
+                    <div
+                        style={{ background: currentEntry.analysis.color }}
+                        className="h-[100px] bg-blue-600 text-white p-8"
+                    >
+                        <h2 className="text-2xl">Analysis</h2>
+                        <ul role="list" className="divide-y divide-gray-200">
+                            <li className="py-4 px-8 flex items-center justify-between">
+                                <div className="text-xl font-semibold w-1/3">
+                                    Subject
+                                </div>
+                                <div className="text-xl">
+                                    {currentEntry.analysis.subject}
+                                </div>
+                            </li>
+
+                            <li className="py-4 px-8 flex items-center justify-between">
+                                <div className="text-xl font-semibold">
+                                    Mood
+                                </div>
+                                <div className="text-xl">
+                                    {currentEntry.analysis.mood}
+                                </div>
+                            </li>
+
+                            <li className="py-4 px-8 flex items-center justify-between">
+                                <div className="text-xl font-semibold">
+                                    Negative
+                                </div>
+                                <div className="text-xl">
+                                    {currentEntry.analysis.negative
+                                        ? 'True'
+                                        : 'False'}
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                ) : (
+                    <div className="h-[100px] bg-gray-200 text-gray-600 p-8">
+                        <h2 className="text-2xl">Analysis</h2>
+                        <p className="text-xl">No analysis available</p>
+                    </div>
+                )}
+
                 <div>
                     <ul role="list" className="divide-y divide-gray-200">
-                        <li className="py-4 px-8 flex items-center justify-between">
-                            <div className="text-xl font-semibold w-1/3">
-                                Subject
-                            </div>
-                            <div className="text-xl">
-                                {/* {currentEntry.analysis.subject} */}
-                            </div>
-                        </li>
-
-                        <li className="py-4 px-8 flex items-center justify-between">
-                            <div className="text-xl font-semibold">Mood</div>
-                            <div className="text-xl">
-                                {/* {currentEntry.analysis.mood} */}
-                            </div>
-                        </li>
-
-                        <li className="py-4 px-8 flex items-center justify-between">
-                            <div className="text-xl font-semibold">
-                                Negative
-                            </div>
-                            <div className="text-xl">
-                                {/* {currentEntry.analysis.negative
-                                    ? 'True'
-                                    : 'False'} */}
-                            </div>
-                        </li>
                         <li className="py-4 px-8 flex items-center justify-around">
                             <button
                                 onClick={analyzeData}
                                 type="button"
                                 className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                             >
-                                Analyze Entry
+                                {isAnalyzing ? (
+                                    <>
+                                        <Spinner /> Analyzing...
+                                    </>
+                                ) : (
+                                    'Analyze Entry'
+                                )}
                             </button>
                             <button
                                 onClick={handleDelete}

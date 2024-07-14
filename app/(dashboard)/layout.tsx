@@ -7,12 +7,14 @@ const links = [
     { name: 'History', href: '/history' },
 ];
 
-const DashboardLayout = ({ children } : PropsWithChildren) => {
+const DashboardLayout = ({ children }: PropsWithChildren) => {
     return (
         <div className="w-screen h-screen relative bg-slate-400">
             <aside className="absolute left-0 top-0 h-full w-[200px] border-r border-black/10">
                 <div className="px-2 my-4">
-                    <span className="text-3xl">MemoMind⚡</span>
+                    <Link href={'/'}>
+                        <span className="text-3xl">MemoMind⚡</span>
+                    </Link>
                 </div>
                 <div>
                     <ul className="px-4">

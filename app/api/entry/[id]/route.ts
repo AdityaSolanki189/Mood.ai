@@ -1,7 +1,6 @@
-import { update } from '@/utils/actions';
-// import { analyzeEntry } from '@/utils/ai';
-import { getUserFromClerkID } from '@/utils/auth';
 import { prisma } from '@/prisma/client';
+import { update } from '@/utils/actions';
+import { getUserFromClerkID } from '@/utils/auth';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface Props {
@@ -28,7 +27,7 @@ export const DELETE = async (request: NextRequest, { params }: Props) => {
 };
 
 export const PATCH = async (request: NextRequest, { params }: Props) => {
-    const { updates } = await request.json();
+    const { updates, analytics } = await request.json();
     const user = await getUserFromClerkID();
 
     const entry = await prisma.journalEntry.update({
@@ -41,19 +40,22 @@ export const PATCH = async (request: NextRequest, { params }: Props) => {
         data: updates,
     });
 
-    // const analysis = await analyzeEntry(entry);
-    // const savedAnalysis = await prisma.analysis.upsert({
-    //     where: {
-    //         entryId: entry.id,
-    //     },
-    //     update: { ...analysis },
-    //     create: {
-    //         entryId: entry.id,
-    //         userId: user.id,
-    //         ...analysis,
-    //     },
-    // });
-
+    if (analytics) {
+        const savedAnalysis = await prisma.analysis.upsert({
+            where: {
+                entryId: entry.id,
+            },
+            update: { ...analytics },
+            create: {
+                entryId: entry.id,
+                userId: user.id,
+                ...analytics,
+            },
+        });
+        return NextResponse.json({
+            data: { ...entry, analysis: savedAnalysis },
+        });
+    }
     update(['/journal']);
 
     return NextResponse.json({ data: { ...entry } });
