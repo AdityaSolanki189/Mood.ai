@@ -1,15 +1,15 @@
-"use server";
+'use server';
 
-import { OpenAI } from '@langchain/openai';
 import { PromptTemplate } from '@langchain/core/prompts';
+import { OpenAI, OpenAIEmbeddings } from '@langchain/openai';
+import { JournalEntry } from '@prisma/client';
 import { loadQARefineChain } from 'langchain/chains';
-import { MemoryVectorStore } from 'langchain/vectorstores/memory';
-import { OpenAIEmbeddings } from '@langchain/openai';
-import {
-    StructuredOutputParser,
-    OutputFixingParser,
-} from 'langchain/output_parsers';
 import { Document } from 'langchain/document';
+import {
+    OutputFixingParser,
+    StructuredOutputParser,
+} from 'langchain/output_parsers';
+import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import { z } from 'zod';
 
 const parser = StructuredOutputParser.fromZodSchema(
@@ -17,7 +17,11 @@ const parser = StructuredOutputParser.fromZodSchema(
         mood: z
             .string()
             .describe('the mood of the person who wrote the journal entry.'),
-        subject: z.string().describe('the subject of the journal entry, it should be in camel case and should contain spaces.'),
+        subject: z
+            .string()
+            .describe(
+                'the subject of the journal entry, it should be in camel case and should contain spaces.'
+            ),
         negative: z
             .boolean()
             .describe(
@@ -27,7 +31,7 @@ const parser = StructuredOutputParser.fromZodSchema(
         color: z
             .string()
             .describe(
-                'a hexidecimal color code that represents the mood of the entry. Example #0101fe for blue representing happiness.'
+                'a hexadecimal color code that represents the mood of the entry. Example #0101fe for blue representing happiness.'
             ),
         sentimentScore: z
             .number()
@@ -62,7 +66,7 @@ export const analyzeEntry = async (prompt: string) => {
         apiKey: process.env.OPENAI_API_KEY,
     });
     const output = await model.invoke(input);
-    console.log("output", output);
+    console.log('output', output);
     try {
         return parser.parse(output);
     } catch (e) {
@@ -71,28 +75,38 @@ export const analyzeEntry = async (prompt: string) => {
             parser
         );
         const fixedOutput = await fixParser.parse(output);
-        console.log("Error", e);
+        console.log('Error', e);
         return fixedOutput;
     }
 };
 
-// export const qa = async (question, entries) => {
-//     const docs = entries.map(
-//         (entry) =>
-//             new Document({
-//                 pageContent: entry.content,
-//                 metadata: { source: entry.id, date: entry.createdAt },
-//             })
-//     );
-//     const model = new OpenAI({ temperature: 0, modelName: 'gpt-3.5-turbo' });
-//     const chain = loadQARefineChain(model);
-//     const embeddings = new OpenAIEmbeddings();
-//     const store = await MemoryVectorStore.fromDocuments(docs, embeddings);
-//     const relevantDocs = await store.similaritySearch(question);
-//     const res = await chain.call({
-//         input_documents: relevantDocs,
-//         question,
-//     });
+export const qa = async ({
+    question,
+    entries,
+}: {
+    question: string;
+    entries: JournalEntry[];
+}) => {
+    const docs = entries.map(
+        (entry) =>
+            new Document({
+                pageContent: entry.content,
+                metadata: { source: entry.id, date: entry.createdAt },
+            })
+    );
+    const model = new OpenAI({
+        temperature: 0,
+        modelName: 'gpt-3.5-turbo',
+        apiKey: process.env.OPENAI_API_KEY,
+    });
+    const chain = loadQARefineChain(model);
+    const embeddings = new OpenAIEmbeddings();
+    const store = await MemoryVectorStore.fromDocuments(docs, embeddings);
+    const relevantDocs = await store.similaritySearch(question);
+    const res = await chain.invoke({
+        input_documents: relevantDocs,
+        question,
+    });
 
-//     return res.output_text;
-// };
+    return res.output_text;
+};

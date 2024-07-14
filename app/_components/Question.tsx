@@ -2,12 +2,14 @@
 
 import { askQuestion } from '@/utils/api';
 import { useState } from 'react';
+import Spinner from './Spinner';
 
 const Question = () => {
     const [question, setQuestion] = useState('');
     const [answer, setAnswer] = useState(null);
     const [loading, setLoading] = useState(false);
-    const handleSubmit = async (e: { preventDefault: () => void; }) => {
+
+    const handleSubmit = async (e: { preventDefault: () => void }) => {
         e.preventDefault();
         setLoading(true);
 
@@ -17,6 +19,7 @@ const Question = () => {
         setLoading(false);
         setQuestion('');
     };
+
     return (
         <div>
             <form onSubmit={handleSubmit}>
@@ -36,8 +39,15 @@ const Question = () => {
                     Ask
                 </button>
             </form>
-            {loading && <p>Loading...</p>}
-            {answer && <p className="my-4 text-xl">{answer}</p>}
+            {loading ? (
+                <p className="my-4 p-4 text-base bg-slate-50 rounded-lg shadow-lg">
+                    <Spinner /> Loading...
+                </p>
+            ) : answer ? (
+                <p className="my-4 p-4 text-base bg-slate-50 rounded-lg shadow-lg">
+                    {answer}
+                </p>
+            ) : null}
         </div>
     );
 };

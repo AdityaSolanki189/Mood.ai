@@ -24,6 +24,7 @@
     "react-autosave": "^0.4.4",
     "react-dom": "^18",
     "react-element-to-jsx-string": "^15.0.0",
+    "recharts": "^2.12.7",
     "tailwind-merge": "^2.4.0",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.23.8"
