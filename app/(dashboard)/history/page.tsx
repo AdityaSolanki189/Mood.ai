@@ -17,7 +17,8 @@ const getData = async () => {
         (acc: any, curr: any) => acc + curr.sentimentScore,
         0
     );
-    const average = total / analysis.length;
+    // calculate average upto 2 decimal places
+    const average = (total / analysis.length).toFixed(2);
 
     const formattedAnalysis = analysis.map((entry: any) => ({
         month: new Date(entry.createdAt).toLocaleString('default', {

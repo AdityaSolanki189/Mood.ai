@@ -66,7 +66,7 @@ interface IProps {
     title: string;
     subtitle: string;
     data: any;
-    average: number;
+    average: string;
 }
 
 export function LineChartComponent({ title, subtitle, data, average }: IProps) {
@@ -123,9 +123,9 @@ export function LineChartComponent({ title, subtitle, data, average }: IProps) {
                     </LineChart>
                 </ChartContainer>
             </CardContent>
-            <CardFooter className="flex-col items-start gap-2 text-sm">
-                <div className="flex gap-2 font-medium leading-none">
-                    Your Average Sentiment Score is {average}.
+            <CardFooter className="flex-col items-center gap-2 text-sm">
+                <div className="flex gap-2 font-medium leading-none items-center">
+                    Your Average Sentiment Score is<span className="font-bold">{average}</span>
                 </div>
                 <div className="leading-none text-muted-foreground">
                     -10 being the most negative and 10 being the most positive.

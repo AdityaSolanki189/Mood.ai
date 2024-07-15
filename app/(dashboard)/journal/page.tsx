@@ -25,12 +25,12 @@ const JournalPage = async () => {
     const entries = await getEntries();
 
     return (
-        <div className="px-6 py-8 bg-zinc-100/50 h-full">
+        <div className="px-6 py-8 bg-slate-100/50 h-full overflow-y-scroll">
             <h1 className="text-4xl mb-12">My Journals</h1>
             <div className="my-8">
                 <Question />
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-4 ">
                 <NewEntry />
                 {entries.map((entry) => (
                     <div key={entry.id}>
