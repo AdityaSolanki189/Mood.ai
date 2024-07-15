@@ -24,7 +24,16 @@ const getData = async () => {
             month: 'long',
         }),
         sentimentScore: entry.sentimentScore,
-        mood: entry.mood
+        mood: entry.mood,
+        date: entry.createdAt.toLocaleString('default', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: true
+        })
     }));
 
     const startDate = new Date(analysis[0].createdAt);

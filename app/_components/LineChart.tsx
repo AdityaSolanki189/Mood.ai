@@ -34,25 +34,33 @@ const chartConfig = {
     },
 } satisfies ChartConfig;
 
-function CustomTooltip({ active, payload, label }: { active: boolean, payload: any[], label: string }) {
+function CustomTooltip({
+    active,
+    payload,
+}: {
+    active: boolean;
+    payload: any[];
+}) {
     const isActive = active;
     const hasPayload = payload && payload.length;
-    
+
     if (isActive && hasPayload) {
         const sentimentScore = payload[0].value;
         const mood = payload[0].payload.mood;
+        const date = payload[0].payload.date;
 
         return (
             <div className="custom-tooltip p-3 bg-white border border-gray-200 rounded-lg shadow-lg">
-                <p className="label font-semibold text-gray-700">{`${label}`}</p>
-                <p className="intro text-gray-600">{`Sentiment Score: ${sentimentScore}`}</p>
-                <p className="desc text-gray-800 font-semibold text-lg">{mood}</p>
+                <p className="desc text-gray-800 font-semibold text-lg">
+                    {mood}
+                </p>
+                <p className="intro font-semibold text-gray-700">{`Sentiment Score: ${sentimentScore}`}</p>
+                <p className="label  text-gray-500">{`${date}`}</p>
             </div>
         );
     }
     return null;
 }
-
 
 interface IProps {
     title: string;
@@ -89,7 +97,9 @@ export function LineChartComponent({ title, subtitle, data, average }: IProps) {
                         />
                         <ChartTooltip
                             cursor={false}
-                            content={<CustomTooltip active={false} payload={data} label={''} />}
+                            content={
+                                <CustomTooltip active={false} payload={data} />
+                            }
                         />
                         <Line
                             dataKey="sentimentScore"
