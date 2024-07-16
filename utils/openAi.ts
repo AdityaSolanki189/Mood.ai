@@ -1,5 +1,3 @@
-'use server';
-
 import { PromptTemplate } from '@langchain/core/prompts';
 import { OpenAI, OpenAIEmbeddings } from '@langchain/openai';
 import { JournalEntry } from '@prisma/client';
