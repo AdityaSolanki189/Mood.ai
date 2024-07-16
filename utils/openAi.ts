@@ -61,7 +61,7 @@ export const analyzeEntry = async (prompt: string) => {
     const model = new OpenAI({
         model: 'gpt-3.5-turbo-instruct',
         temperature: 0,
-        apiKey: process.env.OPENAI_API_KEY,
+        apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
     });
     const output = await model.invoke(input);
     console.log('output', output);
@@ -95,7 +95,7 @@ export const qa = async ({
     const model = new OpenAI({
         temperature: 0,
         modelName: 'gpt-3.5-turbo',
-        apiKey: process.env.OPENAI_API_KEY,
+        apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
     });
     const chain = loadQARefineChain(model);
     const embeddings = new OpenAIEmbeddings();
